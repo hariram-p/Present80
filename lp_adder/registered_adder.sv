@@ -1,3 +1,4 @@
+`timescale 1ns/1ps
 module registered_adder #(
     parameter WIDTH = 8
 )(
