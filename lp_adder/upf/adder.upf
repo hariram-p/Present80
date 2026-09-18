@@ -1,0 +1,29 @@
+# Basic UPF learning example.
+# This defines one switchable power domain, but does NOT assume
+# a SKY130 power-switch cell. Cell mapping must be added after
+# checking the exact installed SKY130 library.
+
+upf_version 2.1
+
+create_power_domain PD_ADDER -elements {registered_adder}
+
+create_supply_port VDD
+create_supply_port VSS
+
+create_supply_net VDD
+create_supply_net VSS
+
+connect_supply_net VDD -ports {VDD}
+connect_supply_net VSS -ports {VSS}
+
+set_domain_supply_net PD_ADDER \
+    -primary_power_net VDD \
+    -primary_ground_net VSS
+
+add_power_state VDD \
+    -state ON \
+    -simstate NORMAL
+
+add_power_state VDD \
+    -state OFF \
+    -simstate CORRUPT
