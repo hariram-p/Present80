@@ -5,7 +5,7 @@
 set DESIGN registered_adder
 
 # CHANGE THIS to your actual SKY130 .db
-set STD_CELL_DB "/path/to/sky130_library.db"
+set STD_CELL_DB "/ve/cg_home/cg0926_hariram_4/hariram/Present80/lp_adder/stdcells.db"
 
 set_app_var target_library [list $STD_CELL_DB]
 set_app_var link_library   [list "*" $STD_CELL_DB]
