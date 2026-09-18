@@ -10,8 +10,7 @@ module registered_adder #(
     output logic [WIDTH:0]   sum
 );
 
-    logic [WIDTH-1:0] a_reg;
-    logic [WIDTH-1:0] b_reg;
+    logic [WIDTH-1:0] a_reg, b_reg;
     logic             valid_reg;
     logic [WIDTH:0]   sum_comb;
 

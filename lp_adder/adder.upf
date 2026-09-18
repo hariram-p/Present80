@@ -1,0 +1,40 @@
+# ============================================================
+# Basic UPF learning example
+# One switchable power domain.
+#
+# NOTE:
+# This file defines power intent only. It does not assume a
+# particular SKY130 power-switch cell.
+# ============================================================
+
+upf_version 2.1
+
+create_power_domain PD_ADDER \
+    -elements {registered_adder}
+
+create_supply_port VDD
+create_supply_port VSS
+
+create_supply_net VDD
+create_supply_net VSS
+
+connect_supply_net VDD \
+    -ports {VDD}
+
+connect_supply_net VSS \
+    -ports {VSS}
+
+set_domain_supply_net PD_ADDER \
+    -primary_power_net VDD \
+    -primary_ground_net VSS
+
+add_power_state VDD \
+    -state ON \
+    -simstate NORMAL
+
+add_power_state VDD \
+    -state OFF \
+    -simstate CORRUPT
+
+# Power-switch implementation is intentionally omitted until
+# the actual SKY130 LP power-switch cell is identified.
