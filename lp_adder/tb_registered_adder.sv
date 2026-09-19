@@ -40,6 +40,7 @@ module tb_registered_adder;
     // ------------------------------------------------------------
     initial begin
         $fsdbDumpfile("adder.fsdb");
+        $fsdbDumpfile("adder.vcd");
         $fsdbDumpvars(0, tb_registered_adder);
     end
 

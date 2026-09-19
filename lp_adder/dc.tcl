@@ -13,13 +13,13 @@ set_app_var link_library   [list "*" $STD_CELL_DB]
 file mkdir reports
 file mkdir syn
 
-analyze -format sverilog registered_adder.sv
+analyze -format sverilog ../Present80/lp_adder/registered_adder.sv
 elaborate $DESIGN
 
 current_design $DESIGN
 link
 
-read_sdc adder.sdc
+read_sdc ../Present80/lp_adder/adder.sdc
 
 check_design > reports/dc_check_design.rpt
 check_timing > reports/dc_check_timing.rpt
