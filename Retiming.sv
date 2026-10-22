@@ -5,7 +5,7 @@ module retiming(input logic clk,input logic resetn, input logic [31:0] a ,input 
     if(!resetn) begin
       a_reg<=0;
       b_reg<=0;
-      out<=0
+      out<=0;
     end
     else begin
       a_reg<=a;
