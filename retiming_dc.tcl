@@ -1,30 +1,28 @@
 # ---------- Setup ----------
 set DESIGN   retiming
+set PROJ_DIR /ve/ws_home/cg0926_hariram_4/hariram/Present80
+
+set RTL_FILE $PROJ_DIR/retiming.sv
+set SDC_FILE $PROJ_DIR/retiming.sdc
 set LIB_DB   /ve/cg_home/cg0926_hariram_4/hariram/Present80/lp_adder/stdcells.db
 
-# Folder containing this script (falls back to the current directory)
-set script_path [info script]
-if {$script_path ne ""} {
-    set SRC_DIR [file dirname [file normalize $script_path]]
-} else {
-    set SRC_DIR [pwd]
-}
+set RPT_DIR  $PROJ_DIR/reports
+set RES_DIR  $PROJ_DIR/results
+set WORK_DIR $PROJ_DIR/WORK
 
-set RTL_FILE $SRC_DIR/retiming.sv
-set SDC_FILE $SRC_DIR/retiming.sdc
+# Create output folders (no error if they already exist)
+file mkdir $RPT_DIR $RES_DIR $WORK_DIR
 
 set target_library [list $LIB_DB]
 set link_library   [list * $LIB_DB]
 
-file mkdir $SRC_DIR/reports $SRC_DIR/results $SRC_DIR/WORK
-
 # ---------- Read RTL ----------
-define_design_lib WORK -path $SRC_DIR/WORK
+define_design_lib WORK -path $WORK_DIR
 analyze -format sverilog -library WORK $RTL_FILE
 elaborate $DESIGN -library WORK
 current_design $DESIGN
 link
-check_design > $SRC_DIR/reports/check_design_pre.rpt
+check_design > $RPT_DIR/check_design_pre.rpt
 
 # ---------- Constraints ----------
 source -echo -verbose $SDC_FILE
@@ -33,28 +31,28 @@ source -echo -verbose $SDC_FILE
 # set_driving_cell -lib_cell <buf_cell> -pin <out_pin> $inputs_no_clk
 # set_load 0.02 [all_outputs]
 
-check_timing > $SRC_DIR/reports/check_timing.rpt
+check_timing > $RPT_DIR/check_timing.rpt
 
 # ---------- Compile with retiming ----------
-set_svf $SRC_DIR/results/${DESIGN}.svf     ;# needed later for Formality
+set_svf $RES_DIR/${DESIGN}.svf
 compile_ultra -retime
 
 # ---------- Post-compile checks ----------
 change_names -rules verilog -hierarchy
-check_design > $SRC_DIR/reports/check_design_post.rpt
+check_design > $RPT_DIR/check_design_post.rpt
 
-report_timing -max_paths 5 -delay_type max > $SRC_DIR/reports/timing_setup.rpt
-report_timing -max_paths 5 -delay_type min > $SRC_DIR/reports/timing_hold.rpt
-report_area                                  > $SRC_DIR/reports/area.rpt
-report_power                                 > $SRC_DIR/reports/power.rpt
-report_qor                                   > $SRC_DIR/reports/qor.rpt
-report_constraint -all_violators             > $SRC_DIR/reports/violators.rpt
-report_reference                             > $SRC_DIR/reports/reference.rpt
-report_register                              > $SRC_DIR/reports/registers.rpt
+report_timing -max_paths 5 -delay_type max > $RPT_DIR/timing_setup.rpt
+report_timing -max_paths 5 -delay_type min > $RPT_DIR/timing_hold.rpt
+report_area                                  > $RPT_DIR/area.rpt
+report_power                                 > $RPT_DIR/power.rpt
+report_qor                                   > $RPT_DIR/qor.rpt
+report_constraint -all_violators             > $RPT_DIR/violators.rpt
+report_reference                             > $RPT_DIR/reference.rpt
+report_register                              > $RPT_DIR/registers.rpt
 
 # ---------- Outputs ----------
-write -format verilog -hierarchy -output $SRC_DIR/results/${DESIGN}_netlist.v
-write -format ddc     -hierarchy -output $SRC_DIR/results/${DESIGN}.ddc
-write_sdc $SRC_DIR/results/${DESIGN}_out.sdc
+write -format verilog -hierarchy -output $RES_DIR/${DESIGN}_netlist.v
+write -format ddc     -hierarchy -output $RES_DIR/${DESIGN}.ddc
+write_sdc $RES_DIR/${DESIGN}_out.sdc
 
 exit
