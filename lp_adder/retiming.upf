@@ -1,0 +1,72 @@
+## =========================================================================
+## 1. Power Domain Definitions
+## =========================================================================
+# Top-level default domain (Always-On)
+create_power_domain PD_TOP -include_scope
+
+# Switched domain encompassing the retiming multiplier module
+create_power_domain PD_CORE \
+  -elements {.}
+
+## =========================================================================
+## 2. Supply Ports & Supply Nets
+## =========================================================================
+# Primary supplies
+create_supply_port VDD_AON
+create_supply_port VSS
+create_supply_port VDD_CORE_IN
+
+# Supply nets
+create_supply_net VDD_AON     -domain PD_TOP
+create_supply_net VSS         -domain PD_TOP
+create_supply_net VSS         -domain PD_CORE -reuse
+create_supply_net VDD_CORE_SW -domain PD_CORE
+
+# Primary domain supply assignments
+set_domain_supply_net PD_TOP  -primary_power_net VDD_AON     -primary_ground_net VSS
+set_domain_supply_net PD_CORE -primary_power_net VDD_CORE_SW -primary_ground_net VSS
+
+## =========================================================================
+## 3. Power Switch Definition (Logical Specification)
+## =========================================================================
+# Cuts VDD to PD_CORE during sleep mode
+create_power_switch pwr_switch_core \
+  -domain PD_CORE \
+  -input_supply_port  {pwr_in  VDD_AON} \
+  -output_supply_port {pwr_out VDD_CORE_SW} \
+  -control_port       {pwr_down_en pwr_down_en} \
+  -on_state           {SW_ON pwr_in {!pwr_down_en}}
+
+## =========================================================================
+## 4. Isolation Strategy (Instantiates 32 Isolation Cells on 'out')
+## =========================================================================
+# Clamps the 32-bit output 'out' to logic 0 when PD_CORE is turned off
+set_isolation iso_core_out \
+  -domain PD_CORE \
+  -isolation_power_net VDD_AON \
+  -isolation_ground_net VSS \
+  -clamp_value 0 \
+  -applies_to outputs
+
+# Define control signal driving the isolation cells
+set_isolation_control iso_core_out \
+  -domain PD_CORE \
+  -isolation_signal iso_en \
+  -isolation_sense high \
+  -location parent
+
+## =========================================================================
+## 5. Retention Strategy (Maps a_reg, b_reg to Retention Flip-Flops)
+## =========================================================================
+# Retains operand register states using the always-on rail during powerdown
+set_retention ret_core_regs \
+  -domain PD_CORE \
+  -retention_power_net VDD_AON \
+  -retention_ground_net VSS \
+  -elements {a_reg b_reg}
+
+# Define retention save/restore control signal
+set_retention_control ret_core_regs \
+  -domain PD_CORE \
+  -save_signal    {save_restore_en high} \
+  -restore_signal {save_restore_en low}
